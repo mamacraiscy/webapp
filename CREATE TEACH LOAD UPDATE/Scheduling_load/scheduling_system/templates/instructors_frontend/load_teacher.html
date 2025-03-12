@@ -1,0 +1,508 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Schedule</title>
+    <link rel="stylesheet" href="{% static 'css/load_teacher11.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+</head>
+<body>
+<div id="main">
+    <h1 id="title-head">Instructor Schedule</h1>
+    <section id="section1">
+        <div id="head-info" class="header-info">
+            <div id= "head1">
+                <label><strong>Name:</strong> 
+                    <input type="text" id="instructor-search" name= "q" placeholder="Search by Name" >
+                </label>
+                <div id="name-suggestions" class="name-suggestions-box"></div>
+                <label><strong>Bachelor's Degree:</strong> <input type="text" id="bachelor-degree" readonly></label>
+                <label><strong>Master's Degree:</strong> <input type="text" id="master-degree" readonly></label>
+                <label><strong>Doctorate Degree:</strong> <input type="text" id="doctorate-degree" readonly></label>
+                <label><strong>Special Training:</strong> <input type="text" id="special-training" readonly></label>
+                <label><strong>Status:</strong> <input type="text" id="status" readonly></label>
+                <label><strong>Major:</strong> <input type="text" id="major" readonly></label>
+                <label><strong>Minors:</strong> <input type="text" id="minors" readonly></label>
+            </div>
+        </div>
+    </section>
+    <section class="summary-section">
+        <h2>Instructor's Load</h2>
+        <div class="scrollable">
+            <table id="instructor-table">
+                <thead>
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Course Name</th>
+                        <th>Degree Yr. & Course</th>
+                        <th>Total No. of Students</th>
+                    </tr>
+                </thead>
+                <tbody id="instructor-load">
+                            <!-- Initially, 3 empty rows THIS IS FOR COURSE TABLE -->
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+
+<!-- THIS IS FOR THE TIME TABLE -->
+<section id="section2">
+    <div class="container">
+        <h1>Weekly Schedule</h1>
+        <table id="timetable">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                    <th>Saturday</th>
+                    <th>Sunday</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+    <footer>
+        <button id="btn-print" class="print-btn">
+          <span class="printer-wrapper">
+            <span class="printer-container">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 92 75">
+                <path
+                  stroke-width="5"
+                  stroke="black"
+                  d="M12 37.5H80C85.2467 37.5 89.5 41.7533 89.5 47V69C89.5 70.933 87.933 72.5 86 72.5H6C4.067 72.5 2.5 70.933 2.5 69V47C2.5 41.7533 6.75329 37.5 12 37.5Z"
+                ></path>
+                <mask fill="white" id="path-2-inside-1_30_7">
+                  <path
+                    d="M12 12C12 5.37258 17.3726 0 24 0H57C70.2548 0 81 10.7452 81 24V29H12V12Z"
+                  ></path>
+                </mask>
+                <path
+                  mask="url(#path-2-inside-1_30_7)"
+                  fill="black"
+                  d="M7 12C7 2.61116 14.6112 -5 24 -5H57C73.0163 -5 86 7.98374 86 24H76C76 13.5066 67.4934 5 57 5H24C20.134 5 17 8.13401 17 12H7ZM81 29H12H81ZM7 29V12C7 2.61116 14.6112 -5 24 -5V5C20.134 5 17 8.13401 17 12V29H7ZM57 -5C73.0163 -5 86 7.98374 86 24V29H76V24C76 13.5066 67.4934 5 57 5V-5Z"
+                ></path>
+                <circle fill="black" r="3" cy="49" cx="78"></circle>
+              </svg>
+            </span>
+        
+            <span class="printer-page-wrapper">
+              <span class="printer-page"></span>
+            </span>
+          </span>
+          Print
+        </button>
+        
+    </footer>
+<script>
+$(document).ready(function() {
+    // Initially hide suggestions
+    $("#name-suggestions").hide();
+
+    var searchData = []; // Cache for instructor data
+    var previousQuery = ""; // To prevent redundant AJAX calls
+
+    // Initialize empty timetable on page load
+    generateTimeSlots();
+
+    function normalizeTime(time) {
+        // Remove any leading zeros from the input
+        time = time.replace(/^0+/, '');
+        
+        // Handle different formats
+        if (time.match(/^\d{1,2}:\d{2}$/)) {
+            // Already in HH:MM format, just ensure 24 hour
+            let [hours, minutes] = time.split(':');
+            hours = parseInt(hours);
+            if (hours <= 12 && hours < 7) {
+                hours += 12;
+            }
+            return hours.toString().padStart(2, '0') + ':' + minutes;
+        }
+        // Handle format like "1:00" -> "13:00"
+        if (time.match(/^1:\d{2}$/)) {
+            return '13:' + time.split(':')[1];
+        }
+        // Add more format handling as needed
+        return time;
+    }
+
+
+function generateTimeSlots() {
+    const timetableBody = $('#timetable tbody');
+    timetableBody.empty();
+    
+    for (let hour = 7; hour <= 21; hour++) {
+        if (hour === 12) {
+            const lunchRow = $('<tr class="lunch-break">');
+            lunchRow.append('<td colspan="8" class="lunch-cell">LUNCH BREAK (12:00 - 1:00)</td>');
+            timetableBody.append(lunchRow);
+            continue;
+        }
+
+        const firstHalfRow = $('<tr>');
+        const secondHalfRow = $('<tr>');
+
+        // Display time in 12-hour format
+        const displayHour = hour > 12 ? hour - 12 : hour;
+        const amPm = hour < 12 ? 'am' : 'pm';
+        const nextDisplayHour = (hour + 1) > 12 ? (hour + 1) - 12 : (hour + 1);
+        const nextAmPm =(hour +1 ) < 12 ? 'am' : 'pm';
+        const timeLabel = `${displayHour}:00 - ${nextDisplayHour}:00 ${nextAmPm}`;
+
+        firstHalfRow.append(`<td rowspan="2" class="time-cell">${timeLabel}</td>`);
+
+        // Store time in 24-hour format for IDs
+        const hourStr = hour.toString().padStart(2, '0');
+        const timeStr1 = `${hourStr}-00`;
+        const timeStr2 = `${hourStr}-30`;
+
+        const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+        days.forEach(day => {
+            firstHalfRow.append(`<td id="${day}-${timeStr1}" data-time="${hourStr}:00" class="time-slot"></td>`);
+            secondHalfRow.append(`<td id="${day}-${timeStr2}" data-time="${hourStr}:30" class="time-slot"></td>`);
+        });
+
+        timetableBody.append(firstHalfRow);
+        timetableBody.append(secondHalfRow);
+    }
+}
+
+
+function getAllTimeSlots(startTime, endTime) {
+    const allTimeSlots = [];
+
+    let [startHour, startMinute] = startTime.split(':').map(Number);
+    let [endHour, endMinute] = endTime.split(':').map(Number);
+
+    // Convert times to total minutes
+    let startTotalMinutes = startHour * 60 + startMinute;
+    const endTotalMinutes = endHour * 60 + endMinute;
+
+    const lunchStart = 12 * 60; // 12:00 PM
+    const lunchEnd = 13 * 60;   // 1:00 PM
+
+    while (startTotalMinutes < endTotalMinutes) {
+        // Skip lunch break
+        if (startTotalMinutes >= lunchStart && startTotalMinutes < lunchEnd) {
+            startTotalMinutes = lunchEnd;
+            continue;
+        }
+
+        const currentHour = Math.floor(startTotalMinutes / 60);
+        const currentMinute = startTotalMinutes % 60;
+
+        const hourStr = currentHour.toString().padStart(2, '0');
+        const minuteStr = currentMinute.toString().padStart(2, '0');
+        const timeStr = `${hourStr}-${minuteStr}`;
+
+        allTimeSlots.push(timeStr);
+
+        // Increment by 30 minutes
+        startTotalMinutes += 30;
+    }
+
+    return allTimeSlots;
+}
+
+function getTimeSlots(startTime, endTime) {
+    const beforeLunchSlots = [];
+    const afterLunchSlots = [];
+
+    let [startHour, startMinute] = startTime.split(':').map(Number);
+    let [endHour, endMinute] = endTime.split(':').map(Number);
+
+    // Convert times to total minutes
+    let startTotalMinutes = startHour * 60 + startMinute;
+    const endTotalMinutes = endHour * 60 + endMinute;
+
+    const lunchStart = 12 * 60; // 12:00 PM
+    const lunchEnd = 13 * 60;   // 1:00 PM
+
+    while (startTotalMinutes < endTotalMinutes) {
+        // Skip lunch break
+        if (startTotalMinutes >= lunchStart && startTotalMinutes < lunchEnd) {
+            startTotalMinutes = lunchEnd;
+            continue;
+        }
+
+        const currentHour = Math.floor(startTotalMinutes / 60);
+        const currentMinute = startTotalMinutes % 60;
+
+        const hourStr = currentHour.toString().padStart(2, '0');
+        const minuteStr = currentMinute.toString().padStart(2, '0');
+        const timeStr = `${hourStr}-${minuteStr}`;
+
+        if (startTotalMinutes < lunchStart) {
+            beforeLunchSlots.push(timeStr);
+        } else {
+            afterLunchSlots.push(timeStr);
+        }
+
+        // Increment by 30 minutes
+        startTotalMinutes += 30;
+    }
+
+    return { beforeLunchSlots, afterLunchSlots };
+}
+
+function populateSchedule(courses) {
+    // Clear previous schedule data
+    $('td.time-slot')
+        .empty()
+        .removeAttr('rowspan')
+        .removeClass('hidden-cell')
+        .show();
+
+    courses.forEach(function(course) {
+        const day = course.day.toUpperCase().slice(0, 3);
+        const { beforeLunchSlots, afterLunchSlots } = getTimeSlots(course.start_time, course.end_time);
+
+        // Extract numeric year from course.year
+        const yearMatch = course.year.match(/\d+/);
+        const yearNumber = yearMatch ? yearMatch[0] : '';
+
+        // Prepare the content to display
+        const content = `${course.course_code}\n${course.program_code} ${yearNumber} ${course.section} ${course.level_shift}\n${course.room_number || ''}`;
+
+        if (beforeLunchSlots.length > 0 && afterLunchSlots.length > 0) {
+            // **Spans AM & PM → Display content only in AM block**
+            mergeCells(day, beforeLunchSlots, content);  // 8 AM - 12 PM → Has content
+            mergeCells(day, afterLunchSlots, '');       // 1 PM - 5 PM → No content
+        } else if (beforeLunchSlots.length > 0) {
+            // **Only AM slots → Show content**
+            mergeCells(day, beforeLunchSlots, content);
+        } else if (afterLunchSlots.length > 0) {
+            // **Only PM slots → Show content**
+            mergeCells(day, afterLunchSlots, content);
+        }
+    });
+}
+
+
+
+function mergeCells(day, timeSlots, content) {
+    if (timeSlots.length === 0) return;
+
+    const startCellId = `${day}-${timeSlots[0]}`;
+    const startCell = $(`#${startCellId}`);
+
+    if (startCell.length > 0) {
+        const rowSpan = timeSlots.length;
+
+        // Split content into lines for styling
+        const lines = content.split('\n').filter(line => line.trim() !== '');
+
+        // Style the merged cell
+        startCell
+            .html(`
+                <div class="course-content" style="padding: 4px; line-height: 1.2;">
+                    ${lines[0] ? `<div style="font-weight: bold; font-size: 12px;">${lines[0]}</div>` : ''}
+                    ${lines[1] ? `<div style="font-size: 11px; margin-top: 2px;">${lines[1]}</div>` : ''}
+                    ${lines[2] ? `<div style="font-size: 10px; margin-top: 2px;">${lines[2]}</div>` : ''}
+                </div>`)
+            .attr('rowspan', rowSpan)
+            .css({
+                'vertical-align': 'middle',
+                'background-color': '#e6f3ff',
+                'border': '1px solid #000',
+                'text-align': 'center',
+                'padding': '2px'
+            })
+            .addClass('merged');
+
+        // Hide the cells that are being merged
+        for (let i = 1; i < timeSlots.length; i++) {
+            const cellId = `${day}-${timeSlots[i]}`;
+            $(`#${cellId}`).hide();
+        }
+    }
+}
+
+
+
+    function clearMergedCells() {
+        $('.time-slot')
+            .removeClass('merged')
+            .removeAttr('rowspan')
+            .css({
+                'background-color': '',
+                'border': '',
+                'vertical-align': '',
+                'font-size': '',
+                'padding': '',
+                'text-align': ''
+            })
+            .show()
+            .empty();
+    }
+
+
+
+    // Function to filter suggestions based on query
+    function filterSuggestions(query) {
+        var filteredResults = searchData[query].filter(function(item) {
+            return item.instructor_name.toLowerCase().includes(query.toLowerCase());
+        });
+
+        // Clear and populate the suggestions box
+        $("#name-suggestions").empty();
+        if (filteredResults.length > 0) {
+            filteredResults.forEach(function(item) {
+                $("#name-suggestions").append(
+                    `<div class="suggestion-item" data-name="${item.instructor_name}">${item.instructor_name}</div>`
+                );
+            });
+            $("#name-suggestions").show();
+        } else {
+            $("#name-suggestions").hide();
+        }
+    }
+
+    // Search input handler
+    $("#instructor-search").on("keyup", function() {
+        var query = $(this).val().trim();
+
+        if (query && query !== previousQuery) {
+            // Check if we have cached data for the current query
+            if (searchData[query]) {
+                filterSuggestions(query); // Use cached data
+            } else {
+                // Fetch new data from server
+                $.ajax({
+                    url: "{% url 'search_stored_data' %}",
+                    data: { q: query },
+                    success: function(data) {
+                        searchData[query] = data.results; // Cache results by query
+                        filterSuggestions(query); // Filter suggestions
+                    },
+                    error: function() {
+                        console.error("Failed to fetch instructor data.");
+                        $("#name-suggestions").hide();
+                    }
+                });
+            }
+            previousQuery = query; // Update previous query
+        } else if (!query) {
+            $("#name-suggestions").hide();
+            previousQuery = "";
+        }
+    });
+
+    // Handle suggestion click
+    $(document).on("click", ".suggestion-item", function() {
+        var instructorName = $(this).text();
+
+        // Set the selected instructor's name in the input
+        $("#instructor-search").val(instructorName);
+        $("#name-suggestions").hide();
+
+        // Clear existing table data
+        clearMergedCells();
+
+        // Clear existing course table data
+        $("#instructor-load tr").each(function(index, row) {
+            if (index >= 3) {
+                $(row).remove();
+            } else {
+                $(row).find("td").html("&nbsp;");
+            }
+        });
+
+        // Fetch instructor's courses and schedule
+        $.ajax({
+            url: "{% url 'get_instructor_load' %}",
+            data: { instructor_name: instructorName },
+                    dataType: "json", // Ensures that the response is parsed as JSON
+                    success: function(data) {
+                        console.log("Instructor load data received:", data);
+                        if (data.courses && data.courses.length > 0) {
+                            data.courses.forEach(function(course, index) {
+                                // Extract numeric year from course.year_level
+                                const yearMatch = course.year_level ? course.year_level.match(/\d+/) : null;
+                                const yearNumber = yearMatch ? yearMatch[0] : '';
+
+                                var degreeYearCourse = [
+                                    course.program_code || "",
+                                    yearNumber, // Ensure only the numeric year is included
+                                    course.section || "",
+                                    course.shift || ""
+                                ].filter(Boolean).join(' ');
+
+                                var row = $("#instructor-load tr").eq(index);
+                                if (row.length > 0) {
+                                    $(row).find("td").eq(0).text(course.course_code);
+                                    $(row).find("td").eq(1).text(course.course_name);
+                                    $(row).find("td").eq(2).text(degreeYearCourse);
+                                    $(row).find("td").eq(3).text(course.total_students || '');
+                                } else {
+                                    $("#instructor-load").append(
+                                        `<tr>
+                                            <td>${course.course_code}</td>
+                                            <td>${course.course_name}</td>
+                                            <td>${degreeYearCourse}</td>
+                                            <td>${course.total_students || ''}</td>
+                                        </tr>`
+                                    );
+                                }
+                            });
+
+            // Proceed with fetching and populating the schedule
+            $.ajax({
+                url: "{% url 'get_instructor_schedule' %}",
+                data: { instructor_name: instructorName },
+                dataType: "json",
+                success: function(response) {
+                    if (response.error) {
+                        console.error(response.error);
+                    } else {
+                        populateSchedule(response.courses);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Failed to fetch the instructor's schedule.", textStatus, errorThrown);
+                }
+            });
+        } else {
+            console.warn("No courses found for this instructor.");
+        }
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+        console.error("Failed to fetch instructor load details.", textStatus, errorThrown);
+        console.log("Response:", jqXHR.responseText);
+    }
+});
+
+
+    });
+
+    // Close suggestions when clicking outside
+    $(document).on("click", function(e) {
+        if (!$(e.target).closest("#instructor-search, #name-suggestions").length) {
+            $("#name-suggestions").hide();
+        }
+    });
+
+    // Print functionality
+    $("#btn-print").click(function() {
+        window.print();
+    });
+});
+    </script>
+</body>
+</html>

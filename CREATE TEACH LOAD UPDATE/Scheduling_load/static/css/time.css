@@ -1,0 +1,51 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f9f9f9;
+}
+
+.container {
+  text-align: center;
+}
+
+.schedule-table {
+  border-collapse: collapse;
+  width: 90%;
+  margin: 0 auto;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.schedule-table th,
+.schedule-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+.schedule-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.schedule-table td {
+  height: 50px;
+  vertical-align: middle;
+}
+
+.schedule-table td[contenteditable="true"] {
+  background-color: #fdfdfd;
+  outline: none;
+  cursor: text;
+}
+
+.schedule-table td[contenteditable="true"]:hover {
+  background-color: #f0f0f0;
+}
+
+.break {
+  background-color: #f8f8f8;
+  font-weight: bold;
+  font-style: italic;
+  color: #888;
+}

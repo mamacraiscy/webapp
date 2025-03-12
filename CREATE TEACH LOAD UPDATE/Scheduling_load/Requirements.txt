@@ -1,0 +1,5 @@
+// Requirements text.
+pip install django
+python -m ensurepip --upgrade
+pip install mysqlclient
+pip install openpyxl

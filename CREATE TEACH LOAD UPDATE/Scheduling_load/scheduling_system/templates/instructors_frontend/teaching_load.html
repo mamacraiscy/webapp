@@ -1,0 +1,1048 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTU Scheduler</title>
+
+    <link rel="stylesheet" href="{% static 'css/2main.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>CTU Scheduler</h1>
+        <nav>
+            <a href="{% url 'index' %}">Home</a>
+            <a href="{% url 'create_teaching_load' %}">View Instructor TimeTable</a>
+            <a href="{% url 'program_by_section' %}">Program by section</a>
+            <a href="#search-instructors">Search Instructors</a>
+        </nav>
+    </header>
+
+<div id="main-container">
+    <!-- Unified Input Section -->
+    <section id="instructor-search">
+        <h2>Input Section</h2>
+        <form id="program-schedule-form">
+            <!-- Instructor Search -->
+             {% csrf_token %}
+            <div class="input-group">
+                <label for="search-input">Search Instructor:</label>
+                <input type="text" id="search-input" name="q" placeholder="Search Instructor" autocomplete="off">
+                <div id="suggestions" class="suggestions-box"></div>
+            </div>
+
+            <div class="input-group">
+                <label for="bachelor-degree">Bachelor's Degree:</label>
+                <input type="text" id="bachelor-degree" name="q" placeholder="Input Instructors Bachelors Degree" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label for="master-degree">Master's Degree:</label>
+                <input type="text" id="master-degree" name="q" placeholder="Input Instructors Master Degree" autocomplete="off">
+            </div>
+
+            <!-- Course Search -->
+            <div class="input-group">
+                <label for="course-search-input">Search Course:</label>
+                <input type="text" id="course-search-input" name="q" placeholder="Search Course" autocomplete="off">
+                <input type="hidden" id="input-course-code" name="course_code">
+                <input type="hidden" id="input-course-name" name="course_name">
+                <div id="course-suggestions" class="suggestions-box"></div>
+            </div>
+
+            <div id="input-group">
+                <label for="credit-units">Credit Units:</label>
+                <input type="number" id="credit-units" name="credit_unit" placeholder="Enter Credit Units" class="form-control">
+            </div>
+
+            
+            <!-- Credit Hours -->
+
+            <div id="input-group">
+                <label for="credit-hours">Credit Hours:</label>
+                <input type="number" id="credit-hours" name="credit_hours" placeholder="Enter Credit Hours" class="form-control">
+            </div>
+
+            
+
+            <!-- Semester -->
+            <div id="input-group">
+                <label for="semester">Semester:</label>
+                <input type="text" id="semester" name="semester" placeholder="Enter Semester" class="form-control">
+            </div> 
+
+            <!-- Program Search -->
+            <div class="input-group">
+                <label for="search-prog">Search Program:</label>
+                <input type="text" id="search-prog" placeholder="Search Program" autocomplete="off">
+                <input type="hidden" id="input-program-name" name="course_code">
+                <input type="hidden" id="input-program-code" name="course_name">
+                <div id="program-suggestions" class="suggestions-box"></div>
+            </div>
+
+
+            <!-- Room Search -->
+            <div class="input-group">
+                <label for="search-rooms">Search Room:</label>
+                <input type="text" id="search-rooms" placeholder="Search Room" autocomplete="off">
+                <input type="hidden" id="input-room-number" name="course_code">
+                <input type="hidden" id="input-room-type" name="course_name">
+                <input type="hidden" id="input-building-name" name="course_code">
+                <input type="hidden" id="input-campus-name" name="course_name">
+                <div id="room-suggestions" class="suggestions-box"></div>
+            </div>
+
+
+            <!-- Room Schedule -->
+            <div id="schedule-container">
+                <div class="schedule-row">
+                    <label for="day-select">Day:</label>
+                    <select class="day-select" id="day-select">
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                    <br>
+                    <label for="start-time">Start Time:</label>
+                    <input type="time" class="start-time" id="start-time" name="start_time">
+            
+                    <label for="end-time">End Time:</label>
+                    <input type="time" class="end-time" id="end-time" name="end_time">
+            
+                    <button type="button" id="remove-schedule" class="remove-schedule">Remove</button>
+                    
+                </div>
+                <!-- "Add Schedule" button is here -->
+                <button type="button" id="add-schedule">Add Schedule</button>
+            </div>
+
+            <!-- Year Level -->
+            <div>
+                <label for="input-yearlvl">Select Year Level:</label>
+                <select id="input-yearlvl" name = "year_level">
+                    <option value="" disabled selected>Select Year Level</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                </select>
+            </div>
+
+            <div>
+                <!-- Section -->
+                <label for="input-section">Select Section:</label>
+                <select id="input-section" name=section>
+                    <option value="" disabled selected>Select Section</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+            </div>
+
+            <div>
+                <!-- Shift -->
+                <label for="input-shift">Select Shift:</label>
+                <select id="input-shift">
+                    <option value="" disabled selected>Select Shift</option>
+                    <option value="Day">Day</option>
+                    <option value="Eve">Eve</option>
+                    <option value="3rd Shift">3rd Shift</option>
+                </select>
+            </div>
+            <br>
+            <section id="conflict-check">
+                <!-- Toggle Button for Conflict Check -->
+                <label for="conflict-toggle">Conflict Check:</label>
+                <button type="button" id="conflict-toggle" class="toggle-button" data-state="on">
+                    <span class="toggle-label">On</span>
+                </button>
+
+                <button id="btn-conflict">Check Conflict / Save</button>
+                <button id="btn-make-another">Make Another</button>
+            </section>
+        </form>
+    </section>
+
+    
+
+    <!-- Unified Details Container -->
+    <section id = "details-container-main">
+         <h1 id="Details">Details</h1>
+        <div id="details-container">
+        </div>
+        <div id="details-container10"></div>
+        <div id="details-container9"></div>
+        <div id="details-container2">
+        </div>
+        <div id="details-container3">
+        </div>
+        <div id="details-container11">
+        </div>
+        <div id="details-container6">
+        </div>
+        <div id="details-container5">
+        </div>
+        <div id="details-container4">
+        </div>
+        <div id="details-container7">
+        </div>
+        <div id="details-container8">
+        </div>
+  
+    </section>
+</div>
+
+
+<!-- Conflict Modal -->
+<div id="conflict-modal" class="modal">
+    <div class="modal-wrapper">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="icon-wrapper">
+            <svg
+              aria-hidden="true"
+              stroke="currentColor"
+              stroke-width="1.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              class="icon"
+            >
+              <path
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+              ></path>
+            </svg>
+          </div>
+          <h3 id="conflict-text" class="modal-title">Conflict Detected</h3>
+        </div>
+        <div class="modal-body">
+          <ul id="conflict-details" class="conflict-details">
+            <!-- Conflict details will be dynamically appended here -->
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button id="close-conflict-modal" class="close-button">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+    <footer>
+        <p>&copy; 2024 CTU Scheduler. All Rights Reserved.</p>
+    </footer>
+
+<!-- AJAX Script -->
+<script>
+$(document).ready(function() {
+    var previousQuery = '';  // Store the previous search query to avoid reloading on every keystroke
+    var searchData = [];  // Store the initial full list of instructors
+
+    // Show suggestions as user types
+    $("#search-input").keyup(function() {
+        var query = $(this).val().trim();  // Get the search query and remove extra spaces
+        var filter = $('#filter-dropdown').val();  // Get the selected filter (if any)
+
+        console.log("Search Query: " + query);  // Debugging line to check what query is entered
+
+        // Trigger search if query length is greater than 1 and if query has changed
+        if (query.length > 0 && query !== previousQuery) {
+            // Clear previous search results to get fresh data
+            searchData = [];
+
+            // If searchData is empty, fetch the full list of instructors based on the new query
+            $.ajax({
+                url: "{% url 'search_instructors' %}",  // Your search URL here
+                data: {
+                    'q': query,  // Send the query to the server
+                    'filter': filter  // Send the filter value to the server
+                },
+                success: function(data) {
+                    console.log("Data returned from backend:", data);  // Debugging line to check the response from the server
+                    searchData = data.results;  // Save the full list of instructors for future filtering
+                    filterSuggestions(query);  // Call to filter the suggestions based on the query
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching suggestions:", error);  // Log error if AJAX fails
+                    $("#suggestions").removeClass('suggestions-visible');  // Hide suggestions on error
+                }
+            });
+
+            // Update the previous query
+            previousQuery = query;
+        } else if (query.length <= 0) {
+            // If the query is cleared, hide suggestions
+            $("#suggestions").removeClass('suggestions-visible');
+        }
+    });
+
+    // Function to filter suggestions based on the current search query
+    function filterSuggestions(query) {
+        var filteredResults = searchData.filter(function(item) {
+            return item.name.toLowerCase().includes(query.toLowerCase());  // Case-insensitive matching
+        });
+
+        // Clear previous suggestions
+        $("#suggestions").html('');
+
+        // If filtered results are found, show them
+        if (filteredResults.length > 0) {
+            $("#suggestions").addClass('suggestions-visible');  // Show the suggestion box
+            filteredResults.forEach(function(item) {
+                // Append each suggestion to the suggestions box
+                $("#suggestions").append('<div class="suggestion-item" data-id="' + item.instructor_id + '">' + item.name + '</div>');
+            });
+        } else {
+            $("#suggestions").removeClass('suggestions-visible');  // Hide the suggestions box if no results
+            $("#suggestions").append('<div class="suggestion-item">No suggestions found.</div>');
+        }
+    }
+
+    // When a suggestion is clicked
+    $(document).on('click', '.suggestion-item', function() {
+        var instructorId = $(this).data('id');  // Get the instructor ID from the clicked suggestion
+        console.log("Instructor ID clicked: " + instructorId);  // Debugging line to check the clicked ID
+        
+        // Handle the selection and fetch details for the clicked instructor
+        $.ajax({
+            url: "{% url 'instructor_details' %}",  // The URL for displaying instructor details
+            data: {
+                'id': instructorId  // Send the instructor ID to fetch details
+            },
+            success: function(data) {
+                console.log("Instructor details:", data);  // Log instructor details for debugging
+                
+                // Insert instructor details into the #details-container
+                $("#details-container").html(`
+                    <p><strong>Name:</strong> ${data.name}</p>
+                    <p><strong>Employment Type:</strong> ${data.employment_type}</p>
+                    <p><strong>Qualified Courses:</strong> ${data.qualified_courses}</p>
+                `);
+
+                // Clear suggestions
+                $("#suggestions").empty();
+
+                // Set the instructor name in the search box
+                $("#search-input").val(data.name);
+
+                // Hide suggestions and show instructor details
+                $("#suggestions").removeClass('suggestions-visible');
+                $("#instructor-details").show();
+
+                // Clear the searchData after a selection
+                searchData = [];  // Reset searchData after a selection
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching instructor details:", error);
+            }
+        });
+    });
+
+    // When the filter dropdown is changed, reset the search input and hide suggestions
+    $("#filter-dropdown").change(function() {
+        var filter = $(this).val();  // Get the selected filter value
+
+        console.log("Filter changed. New filter: " + filter);
+
+        // Clear search input and hide suggestions
+        $("#search-input").val('');
+        $("#suggestions").removeClass('suggestions-visible');
+
+        // Trigger search again with the updated filter (empty search)
+        $.ajax({
+            url: "{% url 'search_instructors' %}",
+            data: {
+                'q': '',  // Clear the search query
+                'filter': filter  // Send the new filter value to the server
+            },
+            success: function(data) {
+                console.log("Data returned from backend after filter change:", data);
+
+                // Save the full list of instructors for future filtering
+                searchData = data.results;
+
+                // Clear suggestions
+                $("#suggestions").html('');
+                $("#suggestions").removeClass('suggestions-visible');
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching suggestions after filter change:", error);
+                $("#suggestions").removeClass('suggestions-visible');
+            }
+        });
+    });
+});
+
+
+// COURSE NI
+$(document).ready(function() {
+    // Handle course search input
+    $("#course-search-input").keyup(function() {
+        var query = $(this).val().trim();  // Get the search query
+        console.log("Course Search query:", query);
+
+        if (query.length > 0) {
+            $.ajax({
+                url: "{% url 'search_courses' %}",
+                data: { 'q': query },
+                success: function(data) {
+                    console.log("Course data:", data);
+                    $("#course-suggestions").html(''); // Clear old suggestions
+
+                    if (data.results.length > 0) {
+                        $("#course-suggestions").addClass('suggestions-visible');
+                        data.results.forEach(function(course) {
+                            $("#course-suggestions").append(
+                                `<div class="suggestion-item2" data-course-id="${course.course_id}" data-course-code="${course.course_code}" data-course-name="${course.course_name}">
+                                    ${course.course_code} - ${course.course_name}
+                                </div>`
+                            );
+                        });
+                    } else {
+                        $("#course-suggestions").html('<div class="no-results">No results found.</div>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching course suggestions:", error);
+                }
+            });
+        } else {
+            $("#course-suggestions").removeClass('suggestions-visible');
+        }
+    });
+
+    // Handle clicking on a course suggestion
+    $(document).on('click', '.suggestion-item2', function() {
+        var courseName = $(this).data('course-name');
+        var courseCode = $(this).data('course-code');
+        var courseId = $(this).data('course-id');  // Extract the course ID
+
+        console.log("Course selected:", courseName, courseCode);
+
+        $("#input-course-code").val(courseCode);
+        $("#input-course-name").val(courseName);
+        $("#course-search-input").val(courseCode);
+
+        $.ajax({
+            url: "{% url 'course_details' %}",
+            data: { 'id': courseId },  // Pass the course ID as a query parameter
+            success: function (data) {
+                console.log("Course details received:", data);
+
+                if (data.error) {
+                    $("#details-container2").html(`<p>Error: ${data.error}</p>`);
+                } else {
+                    // Display course details
+                    $("#details-container2").html(`
+                        <p><strong>Course Code:</strong> ${data.course_code}</p>
+                        <p><strong>Course Name:</strong> ${data.course_name}</p>
+                    `);
+                }
+
+                // Clear suggestions
+                $("#course-suggestions").html('').removeClass('suggestions-visible');
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching course details:", error);
+            }
+        });
+    });
+
+    // Handle credit hours input
+    $("#credit-hours").keyup(function() {
+        var creditHours = $(this).val().trim();
+        console.log("Credit Hours input:", creditHours);
+
+        // Display credit hours dynamically
+        if (creditHours) {
+            $("#details-container3").html(`
+                <p><strong>Credit Hours:</strong> ${creditHours}</p>
+            `);
+        } else {
+            $("#details-container3").html(''); // Clear display if input is empty
+        }
+    });
+
+    // Handle credit units input
+    $("#credit-units").keyup(function() {
+        var creditUnits = $(this).val().trim();
+        console.log("Credit Units input:", creditUnits);
+
+        // Update display
+        if (creditUnits) {
+            $("#details-container11").append(`<p><strong>Credit Units:</strong> ${creditUnits}</p>`);
+        } else {
+            $("#details-container11").html(''); // Clear display if empty
+        }
+    });
+
+
+    // Handle Master Degree
+    $("#master-degree").keyup(function() {
+        var masterDegree = $(this).val().trim();
+        // Display Master's Degree dynamically
+        if (masterDegree) {
+            $("#details-container10").html(`
+                <p><strong>Master's Degree:</strong> ${masterDegree}</p>
+            `);
+        } else {
+            $("#details-container10").html(''); // Clear display if input is empty
+        }
+    });
+
+    // Handle Bachelor Degree
+    $("#bachelor-degree").keyup(function() {
+        var bachelorDegree = $(this).val().trim();
+        // Display Bachelor's Degree dynamically
+        if (bachelorDegree) {
+            $("#details-container9").html(`
+                <p><strong>Bachelor's Degree:</strong> ${bachelorDegree}</p>
+            `);
+        } else {
+            $("#details-container9").html(''); // Clear display if input is empty
+        }
+    });
+
+
+
+    // Handle semester input
+    $("#semester").keyup(function() {
+        var semester = $(this).val().trim();
+        console.log("Semester input:", semester);
+
+        // Display semester dynamically
+        if (semester) {
+            $("#details-container4").html(`
+                <p><strong>Semester:</strong> ${semester}</p>
+            `);
+        } else {
+            $("#details-container4").html(''); // Clear display if input is empty
+        }
+    });
+});
+
+
+// fetch program //
+$(document).ready(function () {
+    // Handle the program search input
+    $("#search-prog").on("keyup", function () {
+        const query = $(this).val();
+
+        if (query) {
+            // Perform AJAX request to fetch matching programs
+            $.ajax({
+                url: "{% url 'search_programs' %}",
+                method: "GET",
+                data: { q: query },
+                success: function (response) {
+                    const suggestions = response.programs.map(program => `
+                        <div class="suggestion-item3" data-id="${program.program_id}" 
+                             data-program-name="${program.program_name}" 
+                             data-program-code="${program.program_code}">
+                            ${program.program_name} (${program.program_code})
+                        </div>
+                    `).join("");
+
+                    const suggestionsBox = $("#program-suggestions");
+                    if (suggestions.length) {
+                        suggestionsBox.html(suggestions).show();
+                    } else {
+                        suggestionsBox.html("<div class='suggestion-item3'>No results found</div>").show();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching programs:", error);
+                },
+            });
+        } else {
+            $("#program-suggestions").empty().hide();
+        }
+    });
+
+    // Handle suggestion click to show program details
+    $(document).on("click", ".suggestion-item3", function () {
+        const programId = $(this).data("id");
+        const programName = $(this).data("program-name");
+        const programCode = $(this).data("program-code");
+
+        // Perform AJAX request to fetch program details with program_id in the query string
+        $.ajax({
+            url: "{% url 'program_details' %}", // No program_id in the URL path anymore
+            method: "GET",
+            data: { program_id: programId },  // Pass program_id as a query parameter
+            success: function (response) {
+                if (response.program) {
+                    const details = `
+                        <p><strong>Program Name:</strong> ${response.program.program_name}</p>
+                        <p><strong>Program Code:</strong> ${response.program.program_code}</p>
+                    `;
+                    // Populate hidden fields with the selected program's details
+                    $("#input-program-name").val(programName);
+                    $("#input-program-code").val(programCode);
+                    $("#details-container6").html(details); // Correct container
+                    $("#program-display").show(); // Show the program details container
+                    $("#search-prog").val(programName); // display {} in search bar
+                } else {
+                    console.error("Error: Program details not found.");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching program details:", error);
+            },
+        });
+
+        // Clear suggestions after selection
+        $("#program-suggestions").empty().hide();
+    });
+});
+
+//ROOM
+$(document).ready(function () {
+    // Track the current query state
+    let lastQuery = '';
+
+    // Handle the room search input
+    $("#search-rooms").on("keyup input", function () {
+        const query = $(this).val().toLowerCase();
+
+        if (query && query !== lastQuery) {
+            lastQuery = query; // Update the last query
+            $.ajax({
+                url: "{% url 'search_rooms' %}",
+                data: {
+                    'q': query,
+                },
+                success: function (data) {
+                    const suggestions = data.rooms.map(function (room) {
+                        return `
+                            <div class="suggestion-item4" 
+                                 data-id="${room.room_id}" 
+                                 data-room-number="${room.room_number}"
+                                 data-room-type="${room.room_type}"
+                                 data-building-name="${room.building_name}"
+                                 data-campus-name="${room.campus_name}">
+                                ${room.room_number} - ${room.room_type}
+                            </div>
+                        `;
+                    }).join('');
+
+                    const suggestionsBox = $("#room-suggestions");
+                    if (suggestions.length) {
+                        suggestionsBox.html(suggestions);
+                        suggestionsBox.show(); // Show suggestions
+                    } else {
+                        suggestionsBox.html("<div class='suggestion-item4'>No results found</div>");
+                        suggestionsBox.show();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching rooms: ", error);
+                }
+            });
+        } else if (!query) {
+            $("#room-suggestions").empty();  // Clear suggestions when input is empty
+            $("#room-suggestions").hide();  // Hide suggestions container
+        }
+    });
+
+    // Show selected room details and hide suggestions
+    $(document).on("click", ".suggestion-item4", function () {
+        const roomId = $(this).data("id");
+        const roomNumber = $(this).data("room-number");
+        const roomType = $(this).data("room-type");
+        const buildingName = $(this).data("building-name");
+        const campusName = $(this).data("campus-name");
+
+        $.ajax({
+            url: "{% url 'room_details' %}",
+            data: {
+                'room_id': roomId,
+            },
+            success: function(data) {
+                console.log(data);
+
+                const details = `
+                    <p><strong>Room Number:</strong> ${data.room.room_number}</p>
+                    <p><strong>Room Type:</strong> ${data.room.room_type}</p>
+                    <p><strong>Building Name:</strong> ${data.room.building_name}</p>
+                    <p><strong>Campus Name:</strong> ${data.room.campus_name}</p>
+                `;
+                // Populate hidden fields with the selected room's details
+                $("#input-room-number").val(roomNumber);
+                $("#input-room-type").val(roomType);
+                $("#input-building-name").val(data.room.building_name);
+                $("#input-campus-name").val(data.room.campus_name);
+
+                $("#details-container5").html(details);  // Corrected selector
+                $("#room-display").show();  // Show room details container
+                $("#search-rooms").val(roomNumber);
+                // Pre-fill the room name and ID in the schedule form
+                $("#selected-room-name").val(data.room.room_number + " - " + data.room.room_type);
+                $("#selected-room-id").val(roomId);
+
+                // Hide suggestions after selection
+                $("#room-suggestions").hide();
+
+                // Reset lastQuery to allow the same query again
+                lastQuery = '';
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching room details: ", error);
+            }
+        });
+    });
+    // Clear suggestions after selection
+    $("#room-suggestions").empty().hide();
+
+
+// Function to convert 24-hour time format to 12-hour time format
+function convertTo12HourFormat(time24) {
+    let [hours, minutes] = time24.split(':');
+    hours = parseInt(hours, 10);
+
+    const suffix = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    minutes = minutes.padStart(2, '0');
+
+    return `${hours}:${minutes} ${suffix}`;
+}
+
+$(document).ready(function () {
+    // Function to add a new schedule row
+    function addScheduleRow() {
+        const scheduleRow = `
+            <div class="schedule-row">
+                <label for="day-select">Day:</label>
+                <select class="day-select" id="day-select">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+                <br>
+                <label for="start-time">Start Time:</label>
+                <input type="time" class="start-time" id="start-time" name="start_time">
+
+                <label for="end-time">End Time:</label>
+                <input type="time" class="end-time" id="end-time" name="end_time">
+
+                <button type="button" class="remove-schedule">Remove</button>
+            </div>
+        `;
+        // Insert the new row just before the "Add Schedule" button, so it appears below the last row
+        $('#schedule-container').children('#add-schedule').before(scheduleRow);
+    }
+
+    // Add initial schedule row on page load (optional, as one is already in your HTML)
+    if ($('#schedule-container .schedule-row').length === 0) {
+        addScheduleRow();
+    }
+
+    // Handle adding new schedule rows
+    $('#add-schedule').on('click', function () {
+        addScheduleRow();
+    });
+
+    // Handle removing a schedule row
+    $(document).on('click', '.remove-schedule', function () {
+        $(this).closest('.schedule-row').remove();
+    });
+
+    // Validate and prepare schedules for form submission
+    $('#schedule-form').submit(function (event) {
+        const schedules = [];
+
+        $('.schedule-row').each(function () {
+            const day = $(this).find('.day-select').val();
+            const startTime = $(this).find('.start-time').val();
+            const endTime = $(this).find('.end-time').val();
+
+            if (!startTime || !endTime) {
+                alert("Both start time and end time are required for each schedule.");
+                event.preventDefault();
+                return false;
+            }
+
+            const startTimeObj = new Date(`1970-01-01T${startTime}Z`);
+            const endTimeObj = new Date(`1970-01-01T${endTime}Z`);
+
+            if (startTimeObj >= endTimeObj) {
+                alert("End time must be later than the start time.");
+                event.preventDefault();
+                return false;
+            }
+
+            schedules.push({ day, startTime, endTime });
+        });
+
+        console.log("Schedules:", schedules);
+
+        // If valid, send data to the server
+        const schedulesJSON = JSON.stringify(schedules);
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'schedules',
+            value: schedulesJSON
+        }).appendTo('#schedule-form');
+    });
+});
+});
+
+// year lvl
+$(document).ready(function () {
+    // Update the details container when a dropdown value is selected
+    function updateDetails() {
+        const yearLevel = $('#input-yearlvl').val() || 'None'; // Get selected year level or default to 'None'
+        const section = $('#input-section').val() || 'None';   // Get selected section or default to 'None'
+        const shift = $('#input-shift').val() || 'None';       // Get selected shift or default to 'None'
+
+        // Update the details container
+        $('#details-container8').html(`
+            <p><strong>Year Level:</strong> ${yearLevel}</p>
+            <p><strong>Section:</strong> ${section}</p>
+            <p><strong>Shift:</strong> ${shift}</p>
+        `);
+    }
+    
+    // Listen for changes on Year Level dropdown
+    $('#input-yearlvl').on('change', function () {
+        updateDetails(); // Update details when year level changes
+    });
+
+    // Listen for changes on Section dropdown
+    $('#input-section').on('change', function () {
+        updateDetails(); // Update details when section changes
+    });
+
+    // Listen for changes on Shift dropdown
+    $('#input-shift').on('change', function () {
+        updateDetails(); // Update details when shift changes
+    });
+
+});
+
+$(document).ready(function () {
+    // Ensure the modal is hidden by default using visibility and opacity
+    $("#conflict-modal").css({
+        visibility: 'hidden',
+        opacity: 0
+    });
+
+    // Initialize the toggle button state
+    const toggleButton = $('#conflict-toggle');
+    const skipConflictCheckInput = $('<input>').attr({
+        type: 'hidden',
+        id: 'skip-conflict-check',
+        name: 'skip_conflict_check',
+        value: 'off' // Default is "off" (conflict check is on)
+    }).appendTo('body'); // Add hidden input to the form
+
+    // Set initial state (default is "on")
+    toggleButton.attr('data-state', 'on');
+    skipConflictCheckInput.val('off'); // Conflict check is on by default
+
+    // Handle toggle button click
+    toggleButton.on('click', function () {
+        const currentState = toggleButton.attr('data-state');
+
+        // Toggle between "on" and "off"
+        if (currentState === 'on') {
+            toggleButton.attr('data-state', 'off');
+            toggleButton.find('.toggle-label').text('Off');
+            skipConflictCheckInput.val('on'); // Skip conflict check
+        } else {
+            toggleButton.attr('data-state', 'on');
+            toggleButton.find('.toggle-label').text('On');
+            skipConflictCheckInput.val('off'); // Perform conflict check
+        }
+    });
+
+    // Handle the Save/Check Conflict button click
+    $('#btn-conflict').on('click', function (e) {
+        e.preventDefault();
+
+        // Get the state of the conflict check toggle
+        const skipConflictCheck = skipConflictCheckInput.val() === 'on';
+
+        // Initialize an empty array for schedules
+        var schedules = [];
+
+        // Loop through each schedule row and collect the data
+        $('.schedule-row').each(function () {
+            var day = $(this).find('.day-select').val();
+            var startTime = $(this).find('.start-time').val();
+            var endTime = $(this).find('.end-time').val();
+
+            // Add validation for start and end time
+            if (!startTime || !endTime) {
+                alert("Both start time and end time are required for each schedule.");
+                return false; // Prevent further processing if any schedule is invalid
+            }
+
+            // Add the schedule to the array
+            schedules.push({
+                day: day,
+                start_time: startTime,
+                end_time: endTime
+            });
+        });
+
+        // Collect form data
+        var formData = {
+            instructor_name: $('#search-input').val(),
+            course_code: $('#input-course-code').val(),
+            course_name: $('#input-course-name').val(),
+            credit_hours: $('#credit-hours').val(),
+            credit_unit: $("#credit-units").val(), // Ensure this is included
+            semester: $('#semester').val(),
+            program_name: $('#input-program-name').val(),
+            program_code: $('#input-program-code').val(),
+            room_number: $('#input-room-number').val(),
+            room_type: $('#input-room-type').val(),
+            building_name: $('#input-building-name').val(),
+            campus_name: $('#input-campus-name').val(),
+            year_level: $('#input-yearlvl').val(),
+            section: $('#input-section').val(),
+            shift: $('#input-shift').val(),
+            schedules: schedules, // Add schedules array to formData
+            skip_conflict_check: skipConflictCheck ? 'on' : 'off', // Add skip_conflict_check parameter
+            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+        };
+
+        // Optionally include bachelor_degree and master_degree if they are provided
+        var bachelorDegree = $('#bachelor-degree').val();
+        if (bachelorDegree) {
+            formData.bachelor_degree = bachelorDegree;
+        }
+
+        var masterDegree = $('#master-degree').val();
+        if (masterDegree) {
+            formData.master_degree = masterDegree;
+        }
+
+        // Disable the button to prevent double submission
+        $(this).prop('disabled', true);
+
+        // AJAX request to check for conflicts
+        $.ajax({
+            url: "{% url 'save_program_schedule' %}", // Ensure this resolves correctly
+            type: "POST",
+            data: formData,
+            success: function (response) {
+                // If there are conflicts, show the conflict modal
+                if (response.conflict) {
+                    // Populate the conflict modal with details
+                    const conflictDetails = response.details;
+                    $(".form-control").removeClass("conflicted");
+                    $("#conflict-details").empty(); // Clear previous details
+
+                    conflictDetails.forEach((detail) => {
+                        $("#conflict-details").append(`
+                            <li>
+                                <strong>${detail.conflict_message}</strong><br>
+                                <strong>Instructor:</strong> ${detail.program_schedule__instructor_name || "N/A"}<br>
+                                <strong>Room:</strong> ${detail.program_schedule__room_number || "N/A"}<br>
+                                <strong>Time:</strong> ${detail.start_time} - ${detail.end_time}<br>
+                                <strong>Day:</strong> ${detail.day}<br>
+                            </li>
+                        `);
+
+                        // Highlight the conflicting fields by adding a red border
+                        if (detail.instructor_name) {
+                            $('#search-input').addClass("conflicted");
+                        }
+                        if (detail.course_name) {
+                            $('#input-course-name').addClass("conflicted");
+                        }
+                        if (detail.room_number) {
+                            $('#input-room-number').addClass("conflicted");
+                        }
+                        if (detail.day) {
+                            $('#day-select').addClass("conflicted");
+                        }
+                        if (detail.start_time || detail.end_time) {
+                            $('#start-time').addClass("conflicted");
+                            $('#end-time').addClass("conflicted");
+                        }
+                        if (detail.conflict_field === 'program_section_year_shift') {
+                            $('#input-program-name').addClass("conflicted");
+                            $('#input-section').addClass("conflicted");
+                            $('#input-yearlvl').addClass("conflicted");
+                            $('#input-shift').addClass("conflicted");
+                        }
+                    });
+
+                    // Show the modal by changing visibility and opacity
+                    $("#conflict-modal").css({
+                        visibility: 'visible',
+                        opacity: 1
+                    });
+                } else {
+                    // No conflict found, proceed with saving
+                    alert("Data saved successfully!");
+                }
+            },
+            error: function (xhr) {
+                // Handle error during conflict check
+                const conflictError = JSON.parse(xhr.responseText);
+                if (conflictError.error) {
+                    alert(conflictError.error);
+                } else {
+                    alert("Error checking for conflicts.");
+                }
+            },
+            complete: function () {
+                // Re-enable the button after processing
+                $('#btn-conflict').prop('disabled', false);
+            }
+        });
+    });
+
+    // Handle Make Another Button Click
+    $('#btn-make-another').on('click', function () {
+        // Reset the form
+        $('#program-schedule-form')[0].reset();
+        $('.schedule-row').not(':first').remove(); // Remove additional schedule rows
+        $('#conflict-details').empty(); // Clear conflict details
+        $("#conflict-modal").css({ visibility: 'hidden', opacity: 0 }); // Hide the modal
+    });
+
+    // Close the modal when the "Close" button is clicked
+    $("#close-conflict-modal").click(function () {
+        // Hide the modal
+        $("#conflict-modal").css({
+            visibility: 'hidden',
+            opacity: 0
+        });
+
+        // Remove any conflicts when modal is closed
+        $(".form-control").removeClass("conflicted");
+    });
+
+    // Close the modal when clicking outside the modal content
+    $(window).click(function (event) {
+        if ($(event.target).is("#conflict-modal")) {
+            $("#conflict-modal").css({
+                visibility: 'hidden',
+                opacity: 0
+            });
+
+            // Remove any conflicts when modal is closed
+            $(".form-control").removeClass("conflicted");
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>

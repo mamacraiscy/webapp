@@ -1,0 +1,52 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTU Teaching Load</title>
+  <link href="{% static 'css/new-style.css' %}" rel="stylesheet">
+</head>
+<body>
+
+  <header>  
+    <div class="logo-bg"></div>
+    <img src="{% static 'img/ctu_logo.png' %}" alt="" class="logo" type="image/png">
+    <span class="logo-label">CTU Teaching Load</span>
+  
+    <div class="timer">
+      <div id="date-time"></div>
+    </div>
+
+    <nav>
+      <ul>
+        <li><a id="focus" href="{% url 'index' %}" class="nav-link">HOME</a></li>
+        <li><a href="#services" class="nav-link">SERVICES</a></li>
+        <li><a href="#about" class="nav-link">ABOUT</a></li>
+        <li><a href="#contact" class="nav-link">CONTACT</a></li>
+        <li><button class="btn-login">LOGIN</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="home">
+      <img src="{% static 'img/ctu-bg-image.png' %}" alt="" class="bg-image">
+
+      <div class="content1">
+        <p>CTU Dumanjug Extension</p>
+        <p class="p1">Teaching Load</p>
+      </div>
+      
+      <div class="btn">
+        <a href="{% url 'teaching_load' %}" class="but btn2">Create Teaching Load</a>
+          <a href="{% url 'create_teaching_load' %}" class="but btn1">Program by Instructor</a> <br><br>
+          <a href="{% url 'program_by_section' %}" class="but btn2">Program by Section</a>
+          <a href="{% url 'room_utilization' %}" class="but btn2">Room Utilization</a>
+          <a href="#" class="but btn2">View instructors</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

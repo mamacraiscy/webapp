@@ -1,0 +1,299 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background-color:transparent;
+}
+
+#main {
+  max-height: 500px;
+  display: inline;
+  place-items: center;
+}
+
+#name-suggestions {
+  max-width: 20%;
+  cursor: pointer;
+  position: absolute;
+  max-height: 200px;
+  overflow-y: auto;
+  border-radius: 7px;
+  display: block;
+  width: 50%;
+  margin-left: auto;
+  background-color: white;
+  z-index: 9999;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 2); 
+  padding: 11px;
+}
+
+.suggestions-box div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.suggestions-box div:hover {
+  background-color: #f0f0f0;
+}
+
+/* Header Input Styles */
+.header-info input {
+  border:none;
+  border-bottom: 1px solid #000000;
+  background: transparent;
+  outline: none;
+  padding: 2px;
+  font-size: 1rem;
+  color: #333;
+  width: 100%;
+  max-width: 50%;
+  margin-left: 0.5rem;
+}
+
+.header-info label {
+  display: block;
+  margin: 0.5rem 0;
+}
+
+.header-info input:focus {
+  border-bottom: 1px solid #0044cc;
+}
+
+#title-head {
+  text-align: center;
+}
+
+#head-info {
+  display: contents;
+  max-width: 50%;
+  width: 100%;
+  border-color: black;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+input {
+  max-width: 55%;
+  width: 100%;
+}
+
+#section1 {
+  max-width: 45%;
+  width: 100%;
+  padding-right: auto 10px;
+  display: grid;
+  place-items: center;
+  margin: auto;
+  background-color: transparent;
+  justify-content: flex-start;
+}
+
+/* table column styles */
+.summary-section {
+  font-family: Arial, sans-serif;
+  display: block;
+  place-items: center;
+  max-width: 75%;
+  width: 100%;
+  padding: 1px;
+  margin: auto;
+}
+
+section {
+  margin: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#section2 {
+  font-family: Arial, sans-serif;
+  display: block;
+  place-items: center;
+  max-width: 75%;
+  width: 100%;
+  padding: 1px;
+  margin: auto;
+}
+
+.container {
+  max-width: 90%;
+  width: 100%;
+}
+
+h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.scrollable {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+th {
+  background: #f0f0f0;
+  color: #333;
+}
+
+footer {
+  background: transparent;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  bottom: 0;
+  width: 100%;
+}
+
+footer p {
+  margin: 0.2rem 0;
+}
+
+.scrollable {
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+th {
+  background-color: #f2f2f2;
+  text-align: center;
+}
+
+td {
+  vertical-align: top;
+}
+
+/* Adjust column widths */
+#instructor-table th:first-child {
+  width: 10%; /* Course Code column */
+}
+
+#instructor-table th:nth-child(2) {
+  width: 35%; /* Course Name column */
+}
+
+#instructor-table th:nth-child(3) {
+  width: 10%; /* Degree Yr. & Course column */
+}
+
+#instructor-table th:last-child {
+  width: 10%; /* Total No. of Students column */
+  text-align: center;
+}
+
+/* Optional: Hover effect for rows */
+#instructor-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+#timetable {
+  table-layout: fixed; /* Prevents auto resizing */
+  width: 100%; /* Stretches the whole width */
+  border-collapse: collapse;
+}
+
+#timetable th, 
+#timetable td {
+  width: 12.5%; /* Ensure equal column width */
+  text-align: center;
+  vertical-align: middle;
+  border: 1px solid black;
+  padding: 5px;
+  font-size: 10px; /* Makes text smaller */
+  white-space: nowrap; /* Prevents text wrapping */
+  overflow: hidden; /* Prevents overflow */
+  text-overflow: ellipsis; /* Adds '...' if text is too long */
+}
+
+#timetable td {
+  height: 25px; /* Fix row height */
+}
+
+/* Ensures hidden cells keep their space */
+.hidden-cell {
+  visibility: hidden;
+  border: none;
+  padding: 0;
+  margin: 0;
+  height: 0;
+  line-height: 0;
+}
+
+/* Small text styling */
+.small-text {
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.time-slot {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Hiding half-hour cells */
+.half-hour {
+  visibility: hidden; /* Makes the cell invisible but still takes up space */
+  height: 0; /* Sets height to 0 so it doesn't affect layout */
+  padding: 0; /* Removes padding */
+  border: none; /* Optional: removes the border */
+}
+
+/* Print Styles */
+@media print {
+  #btn-print, footer {
+    display: none;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+  .header-info label, .summary-section h2, .scrollable {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  table, th, td {
+    border: 1px solid black;
+  }
+
+  th, td {
+    padding: 8px;
+    text-align: left;
+  }
+}
